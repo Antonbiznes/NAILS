@@ -8,8 +8,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=php-website', 'root', '');
-
+$pdo = new PDO('mysql:host=localhost;dbname=php-website', 'root', '');
 
 $sql_days = 'SELECT `date`, COUNT(*) as count FROM yslygi GROUP BY `date` ORDER BY `date` DESC';
 $query_days = $pdo->prepare($sql_days);
