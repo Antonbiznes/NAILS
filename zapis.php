@@ -120,13 +120,12 @@
         <h1 class="form-title">Запись на прием</h1>
         
         <form action="lib/zapis.php" method="POST">
-            <!-- Личная информация -->
+            
             <div class="form-group">
                 <label for="name" class="required">Имя и Фамилия</label>
                 <input type="text" id="name" name="name" required>
             </div>
             
-            <!-- Контактная информация -->
             <div class="form-group">
                 <label for="phone" class="required">Телефон</label>
                 <input type="tel" id="phone" name="phone" required>
@@ -137,7 +136,6 @@
                 <input type="email" id="email" name="email">
             </div>
             
-            <!-- Выбор услуги -->
             <div class="form-group">
                 <label for="service" class="required">Услуга</label>
                 <select id="service" name="service" required>
@@ -149,7 +147,6 @@
                 </select>
             </div>
             
-            <!-- Дата и время -->
             <div class="form-group">
                 <label for="date" class="required">Дата приема</label>
                 <input type="date" id="date" name="date" required min="<?php echo date('Y-m-d'); ?>">
@@ -196,15 +193,12 @@
         const hoursSelect = document.getElementById('hours');
         const minutesSelect = document.getElementById('minutes');
 
-        // Устанавливаем min для даты (сегодня или позже)
         dateInput.min = today.toISOString().split('T')[0];
 
-        // Функция для обновления часов
         function updateTimeOptions() {
             const selectedDate = new Date(dateInput.value);
             const isToday = selectedDate.toDateString() === today.toDateString();
 
-            // Сбрасываем опции часов
             hoursSelect.innerHTML = '<option value="">--</option>';
             for (let h = 8; h <= 20; h++) {
                 const hourStr = h.toString().padStart(2, '0');
@@ -212,46 +206,40 @@
                 option.value = hourStr;
                 option.text = hourStr;
                 if (isToday && h < today.getHours() + 1) {
-                    option.disabled = true;  // Отключаем прошедшие часы
+                    option.disabled = true;  
                 }
                 hoursSelect.appendChild(option);
             }
 
-            // Вызываем обновление минут после изменения часов
             updateMinutes();
         }
 
-        // Функция для обновления минут
         function updateMinutes() {
-            const selectedHour = parseInt(hoursSelect.value || 0);  // 0 если не выбрано
+            const selectedHour = parseInt(hoursSelect.value || 0); 
             const selectedDate = new Date(dateInput.value);
             const isToday = selectedDate.toDateString() === today.toDateString();
 
             if (isToday && selectedHour === today.getHours()) {
-                // Отключаем прошедшие минуты
-                minutesSelect.options[1].disabled = (today.getMinutes() > 0);   // 00, если >0 мин
-                minutesSelect.options[2].disabled = (today.getMinutes() >= 30); // 30, если >=30
+                
+                minutesSelect.options[1].disabled = (today.getMinutes() > 0);   
+                minutesSelect.options[2].disabled = (today.getMinutes() >= 30);
             } else {
                 minutesSelect.options[1].disabled = false;
                 minutesSelect.options[2].disabled = false;
             }
         }
 
-        // Слушатели событий (добавляем только раз)
         dateInput.addEventListener('change', updateTimeOptions);
         hoursSelect.addEventListener('change', updateMinutes);
 
-        // Начальный вызов
         updateTimeOptions();
     });
 </script>
-            <!-- Комментарий -->
             <div class="form-group">
                 <label for="comment">Комментарий</label>
                 <textarea id="comment" name="comment" rows="4"></textarea>
             </div>
             
-            <!-- Кнопка отправки -->
             <button type="submit" class="submit-btn">Записаться на прием</button>
         </form>
     </div>
