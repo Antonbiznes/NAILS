@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись на прием</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .booking-form {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .required::after {
+            content: " *";
+            color: red;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        .time-selection {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .time-group {
+            flex: 1;
+        }
+        
+        .submit-btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+        .time-slot {
+    padding: 8px 12px;
+    margin: 5px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    text-align: center;
+}
+
+.time-slot.available {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.time-slot.booked {
+    background-color: #cccccc;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #999;
+}
+
+.time-slot.available:hover {
+    background-color: #45a049;
+}
+
+/* Контейнер для времени */
+.time-slots-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+    </style>
+</head>
+<body>
+    <div class="booking-form">
+        <h1 class="form-title">Запись на прием</h1>
+        
+        <form action="lib/zapis.php" method="POST">
+            <!-- Личная информация -->
+            <div class="form-group">
+                <label for="name" class="required">Имя и Фамилия</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <!-- Контактная информация -->
+            <div class="form-group">
+                <label for="phone" class="required">Телефон</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+            </div>
+            
+            <!-- Выбор услуги -->
+            <div class="form-group">
+                <label for="service" class="required">Услуга</label>
+                <select id="service" name="service" required>
+                    <option value="">Выберите услугу</option>
+                    <option value="pedicur">Педикюр</option>
+                    <option value="manicur">Маникюр</option>
+                    <option value="narashivanie">Наращивание</option>
+                    <option value="chistka">Чистка</option>
+                </select>
+            </div>
+            
+            <!-- Дата и время -->
+            <div class="form-group">
+                <label for="date" class="required">Дата приема</label>
+                <input type="date" id="date" name="date" required min="<?php echo date('Y-m-d'); ?>">
+            </div>
+            
+            <div class="form-group">
+                <label class="required">Время приема</label>
+                <div class="time-selection">
+                    <div class="time-group">
+                        <label for="hours">Часы</label>
+                        <select id="hours" name="hours" required>
+                            <option value="">--</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
+                    
+                    <div class="time-group">
+                        <label for="minutes">Минуты</label>
+                        <select id="minutes" name="minutes" required>
+                            <option value="">--</option>
+                            <option value="00">00</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const dateInput = document.getElementById('date');
+        const hoursSelect = document.getElementById('hours');
+        const minutesSelect = document.getElementById('minutes');
+
+        // Устанавливаем min для даты (сегодня или позже)
+        dateInput.min = today.toISOString().split('T')[0];
+
+        // Функция для обновления часов
+        function updateTimeOptions() {
+            const selectedDate = new Date(dateInput.value);
+            const isToday = selectedDate.toDateString() === today.toDateString();
+
+            // Сбрасываем опции часов
+            hoursSelect.innerHTML = '<option value="">--</option>';
+            for (let h = 8; h <= 20; h++) {
+                const hourStr = h.toString().padStart(2, '0');
+                const option = document.createElement('option');
+                option.value = hourStr;
+                option.text = hourStr;
+                if (isToday && h < today.getHours() + 1) {
+                    option.disabled = true;  // Отключаем прошедшие часы
+                }
+                hoursSelect.appendChild(option);
+            }
+
+            // Вызываем обновление минут после изменения часов
+            updateMinutes();
+        }
+
+        // Функция для обновления минут
+        function updateMinutes() {
+            const selectedHour = parseInt(hoursSelect.value || 0);  // 0 если не выбрано
+            const selectedDate = new Date(dateInput.value);
+            const isToday = selectedDate.toDateString() === today.toDateString();
+
+            if (isToday && selectedHour === today.getHours()) {
+                // Отключаем прошедшие минуты
+                minutesSelect.options[1].disabled = (today.getMinutes() > 0);   // 00, если >0 мин
+                minutesSelect.options[2].disabled = (today.getMinutes() >= 30); // 30, если >=30
+            } else {
+                minutesSelect.options[1].disabled = false;
+                minutesSelect.options[2].disabled = false;
+            }
+        }
+
+        // Слушатели событий (добавляем только раз)
+        dateInput.addEventListener('change', updateTimeOptions);
+        hoursSelect.addEventListener('change', updateMinutes);
+
+        // Начальный вызов
+        updateTimeOptions();
+    });
+</script>
+            <!-- Комментарий -->
+            <div class="form-group">
+                <label for="comment">Комментарий</label>
+                <textarea id="comment" name="comment" rows="4"></textarea>
+            </div>
+            
+            <!-- Кнопка отправки -->
+            <button type="submit" class="submit-btn">Записаться на прием</button>
+        </form>
+    </div>
+</body>
+</html>
