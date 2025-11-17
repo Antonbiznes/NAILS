@@ -4,27 +4,21 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: auth.php');
     exit;
 }
-// Включаем отображение ошибок для отладки (уберите в продакшене)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// Подключение к БД
-try {
-    $pdo = new PDO('mysql:host=localhost;dbname=php-website', 'root', '');
+
+$pdo = new PDO('mysql:host=localhost;dbname=php-website', 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Ошибка подключения к базе данных: " . $e->getMessage());
-}
-// Обработка сортировки (через GET-параметр, например ?sort=date_desc)
-$sort = $_GET['sort'] ?? 'date_asc'; // По умолчанию: по дате ascending (возрастание)
-// Определяем ORDER BY в зависимости от выбранной сортировки
-$orderBy = 'date ASC, hours ASC, minutes ASC'; // По умолчанию
+
+$sort = $_GET['sort'] ?? 'date_asc'; 
+
+$orderBy = 'date ASC, hours ASC, minutes ASC'; 
 if ($sort === 'date_desc') {
     $orderBy = 'date DESC, hours DESC, minutes DESC';
 } elseif ($sort === 'name_asc') {
     $orderBy = 'name ASC';
-} // Можно добавить больше вариантов, например 'name_desc' => 'name DESC'
-// SQL-запрос с сортировкой
+}
 $sql = "SELECT * FROM yslygi ORDER BY $orderBy";
 $query = $pdo->prepare($sql);
 $query->execute();
@@ -42,12 +36,10 @@ $records = $query->fetchAll(PDO::FETCH_ASSOC);
 <body>
     <div class="container">
         <?php require_once "blocks/lc.php"; ?>
-        <!-- Основной контент -->
         <div class="main-content">
             <div class="header">
                 <h2>Записи клиентов</h2>
             </div>
-            <!-- Статистика -->
             <div class="stats-cards">
                 <div class="stat-card">
                     <div class="stat-number"><?= count($records) ?></div>
@@ -68,7 +60,6 @@ $records = $query->fetchAll(PDO::FETCH_ASSOC);
                     <div class="stat-label">Видов услуг</div>
                 </div>
             </div>
-            <!-- Панель управления -->
             <div class="control-panel">
                 <div class="sort-links">
                     <span>Сортировать:</span>
@@ -81,10 +72,8 @@ $records = $query->fetchAll(PDO::FETCH_ASSOC);
                     <a href="?sort=name_asc" class="sort-btn <?= $sort === 'name_asc' ? 'active' : '' ?>">
                         <i class="fas fa-sort-alpha-up"></i> Имя (A-Z)
                     </a>
-                    <!-- Добавьте другие сортировки, если нужно -->
                 </div>
             </div>
-            <!-- Таблица записей -->
             <div class="table-container">
                 <?php if (empty($records)): ?>
                 <div class="no-records">
@@ -130,9 +119,7 @@ $records = $query->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
     <script>
-        // Простой скрипт для навигации
         document.addEventListener('DOMContentLoaded', function() {
-            // Подсветка активной ссылки сортировки
             const sortButtons = document.querySelectorAll('.sort-btn');
             sortButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -140,7 +127,6 @@ $records = $query->fetchAll(PDO::FETCH_ASSOC);
                     this.classList.add('active');
                 });
             });
-            // Подсветка строк таблицы при наведении
             const tableRows = document.querySelectorAll('.appointments-table tbody tr');
             tableRows.forEach(row => {
                 row.addEventListener('mouseenter', function() {
